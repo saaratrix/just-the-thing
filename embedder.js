@@ -8,8 +8,6 @@
         if (isTenor) {
             embedTenor();
         }
-
-
     });
 
     function embedTenor() {
@@ -21,6 +19,7 @@
             return;
         }
 
+        document.body.classList.add('tenor');
         document.body.innerHTML += `<iframe allowtransparency="true" allowfullscreen="true" scrolling="no" style="position:absolute;top:0;left:0;width:100%;height:100%;" src="https://tenor.com/embed/${id}?canonicalurl=" frameborder="0"></iframe>`
     }
 }();

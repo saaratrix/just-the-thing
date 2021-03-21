@@ -3,6 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <style>
+        .tenor {
+            background-color: #3f3f3f;
+            margin: auto;
+        }
+
+        iframe {
+            max-width: 640px;
+            /* This doesn't work on smaller than 640px width screens but that's ok! */
+            /* Or if the width is smaller than 640 px it'd be a off center. */
+            transform: translateX(calc((100vw - 640px) / 2));
+        }
+    </style>
 </head>
 <body>
     <script src="/gif-embedder/embedder.js" type="application/javascript"></script>
