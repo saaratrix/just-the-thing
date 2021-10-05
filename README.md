@@ -1,1 +1,6 @@
 # gif-embedder
+
+Can be found at: https://saaratrix.github.io/just-the-thing/
+
+## Tenor example:
+https://saaratrix.github.io/just-the-thing/https://tenor.com/view/toothless-how-to-train-your-dragon-happy-gif-15773225
