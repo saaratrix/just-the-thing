@@ -2,7 +2,7 @@
     const isTenorRegex = /tenor\.com/;
     const tenorIdRegex = /\d+$/;
     // Example URL: https://cdn.discordapp.com/attachments/12345/67890/test.gif
-    const discordUrlRegex = /https:\/\/cdn.discordapp.com\/\S+/;
+    const discordUrlRegex = /https:\/\/(cdn|media).discordapp.(com|net)\/\S+/;
 
     window.addEventListener('load', () => {
         const isTenor = isTenorRegex.test(location.href);
