@@ -40,12 +40,15 @@
 
         const images = ['jpg', 'jpeg', 'png', 'gif'];
         const videos = ['mp4'];
+        const audio = ['mp3'];
 
         document.body.classList.add('discord');
         if (videos.includes(fileExtension)) {
             embedVideo(url, fileExtension);
         } else if (images.includes(fileExtension)) {
             embedImage(url);
+        } else if (audio.includes(fileExtension)) {
+            embedAudio(url, fileExtension);
         }
     }
 
@@ -55,5 +58,9 @@
 
     function embedImage(url) {
         document.body.innerHTML += `<img src="${url}" alt="image!" />`;
+    }
+
+    function embedAudio(url, type) {
+        document.body.innerHTML += `<audio controls><source src="${url}" type="audio/${type}"></audio>`;
     }
 }();
