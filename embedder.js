@@ -40,7 +40,7 @@
 
         const images = ['jpg', 'jpeg', 'png', 'gif'];
         const videos = ['mp4'];
-        const audio = ['mp3'];
+        const audio = ['mp3', 'wav'];
 
         document.body.classList.add('discord');
         if (videos.includes(fileExtension)) {
