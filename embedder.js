@@ -39,7 +39,7 @@
         fileExtension = fileExtension[fileExtension.length - 1];
 
         const images = ['jpg', 'jpeg', 'png', 'gif'];
-        const videos = ['mp4'];
+        const videos = ['mp4', 'webm'];
         const audio = ['mp3', 'wav'];
 
         document.body.classList.add('discord');
