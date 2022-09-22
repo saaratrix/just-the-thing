@@ -1,19 +1,45 @@
 !function() {
+    const Types = { Unknown: 0, Tenor: 1, Discord: 2, DiscordExternal: 3 };
+
     const isTenorRegex = /tenor\.com/;
     const tenorIdRegex = /\d+$/;
     // Example URL: https://cdn.discordapp.com/attachments/12345/67890/test.gif
     const discordUrlRegex = /https:\/\/(cdn|media).discordapp.(com|net)\/\S+/;
+    const discordExternalUrlRegex = /https:\/\/images-ext-2.discordapp.(com|net)\/(?<query>(?!https])\S+)(?<resource>(https|http)\S+)/i;
 
     window.addEventListener('load', () => {
-        const isTenor = isTenorRegex.test(location.href);
-        const isDiscord = discordUrlRegex.test(location.href);
 
-        if (isTenor) {
-            embedTenor();
-        } else if (isDiscord) {
-            embedDiscord();
+
+        const type = getType();
+        switch(type) {
+            case Types.Tenor:
+                embedTenor();
+                break;
+            case Types.Discord:
+                embedDiscord();
+                break;
+            case Types.DiscordExternal:
+                embedDiscordExternal();
+                break;
+            default:
+                break;
         }
+
     });
+
+    function getType() {
+        if (isTenorRegex.test(location.href)) {
+            return Types.Tenor;
+        }
+        if (discordUrlRegex.test(location.href)) {
+            return Types.Discord
+        }
+        if (discordExternalUrlRegex.test(location.href)) {
+            return Types.DiscordExternal;
+        }
+
+        return Types.Unknown;
+    }
 
     function embedTenor() {
         const regexResult = location.href.match(tenorIdRegex);
@@ -35,8 +61,33 @@
             return;
         }
         const url = exec[0];
+        embedDiscordResource(url)
+    }
+
+    function embedDiscordExternal() {
+        const exec = discordExternalUrlRegex.exec(location.href);
+        if (!exec) {
+            document.body.innerHTML += "<p style='color: red;'>Could not get external discord link from url!!</p>";
+            return;
+        }
+        let url = exec.groups.resource;
+        const queryParts = exec.groups.query.split('/');
+        const query = decodeURIComponent(queryParts[queryParts.length - 2] ?? '');
+
+        if (url.startsWith('https/')) {
+            url = `https://${url.substring(6)}`;
+        } else if (url.startsWith('http/')) {
+            url = `https://${url.substring(5)}`
+        }
+
+        url += `${query}`;
+
+        embedDiscordResource(url);
+    }
+
+    function embedDiscordResource(url) {
         let fileExtension = url.split('.');
-        fileExtension = fileExtension[fileExtension.length - 1];
+        fileExtension = fileExtension[fileExtension.length - 1].split('?')[0];
 
         const images = ['jpg', 'jpeg', 'png', 'gif'];
         const videos = ['mp4', 'webm'];
