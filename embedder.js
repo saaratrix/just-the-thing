@@ -5,11 +5,10 @@
     const tenorIdRegex = /\d+$/;
     // Example URL: https://cdn.discordapp.com/attachments/12345/67890/test.gif
     const discordUrlRegex = /https:\/\/(cdn|media).discordapp.(com|net)\/\S+/;
-    const discordExternalUrlRegex = /https:\/\/images-ext-2.discordapp.(com|net)\/(?<query>(?!https])\S+)(?<resource>(https|http)\S+)/i;
+    // Example URL: https://images-ext-1.discordapp.net/external/abaYIADYF/https/i.redd.it/test.jpg
+    const discordExternalUrlRegex = /https:\/\/images-ext-\d.discordapp.(com|net)\/(?<query>(?!https])\S+)(?<resource>(https|http)\S+)/i;
 
     window.addEventListener('load', () => {
-
-
         const type = getType();
         switch(type) {
             case Types.Tenor:
@@ -22,6 +21,7 @@
                 embedDiscordExternal();
                 break;
             default:
+                addUrlInput();
                 break;
         }
 
@@ -39,6 +39,42 @@
         }
 
         return Types.Unknown;
+    }
+
+    function addUrlInput() {
+        const basePrefix = '/just-the-thing';
+        const currentUrl = (location.pathname ?? '') + (location.query ?? '') + (location.hash ?? '');
+        if (currentUrl || currentUrl === basePrefix) {
+            document.body.innerHTML += `<p>${currentUrl}</p>`;
+        }
+
+        document.body.innerHTML += `
+<div>
+  <input type="text" class="url-input" name="url">
+  <br>
+  <p class="url-input-message"></p>
+  <br>
+  <button class="url-change">Embed</button>
+</div>`
+
+        const input = document.querySelector('.url-input');
+        input.addEventListener('input', function() {
+            if (input.value) {
+                button.removeAttribute('disabled');
+            } else {
+                button.setAttribute('disabled', '');
+            }
+        });
+
+        const button = document.querySelector('.url-change');
+        button.setAttribute('disabled', '');
+
+        button.addEventListener('click', () => {
+            const input = document.querySelector('.url-input');
+            const hasPrefixUrl = location.pathname.startsWith(basePrefix);
+            const prefix = hasPrefixUrl ? prefix : '/';
+            location.href = location.origin + prefix + input.value;
+        });
     }
 
     function embedTenor() {
