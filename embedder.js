@@ -72,7 +72,7 @@
         button.addEventListener('click', () => {
             const input = document.querySelector('.url-input');
             const hasPrefixUrl = location.pathname.startsWith(basePrefix);
-            const prefix = hasPrefixUrl ? prefix : '/';
+            const prefix = hasPrefixUrl ? basePrefix : '/';
             location.href = location.origin + prefix + input.value;
         });
     }
@@ -107,8 +107,6 @@
             return;
         }
         let url = exec.groups.resource;
-        const queryParts = exec.groups.query.split('/');
-        const query = decodeURIComponent(queryParts[queryParts.length - 2] ?? '');
 
         if (url.startsWith('https/')) {
             url = `https://${url.substring(6)}`;
@@ -116,7 +114,13 @@
             url = `https://${url.substring(5)}`
         }
 
-        url += `${query}`;
+        // const queryParts = exec.groups.query.split('/');
+        // let query = decodeURIComponent(queryParts[queryParts.length - 2] ?? '');
+        // if (!query.startsWith('?')) {
+        //     query = `?${query}`;
+        // }
+        //
+        // url += `${query}`;
 
         embedDiscordResource(url);
     }
