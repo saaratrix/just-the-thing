@@ -50,6 +50,8 @@
 
         document.body.innerHTML += `
 <div>
+  <label>URL to embed:</label>
+  <br>
   <input type="text" class="url-input" name="url">
   <br>
   <p class="url-input-message"></p>
@@ -73,7 +75,10 @@
             const input = document.querySelector('.url-input');
             const hasPrefixUrl = location.pathname.startsWith(basePrefix);
             const prefix = hasPrefixUrl ? basePrefix : '/';
-            location.href = location.origin + prefix + input.value;
+
+            const originPlusPrefix = location.origin + prefix;
+            const extraSlash = (!originPlusPrefix.endsWith('/') && !input.value.startsWith('/')) ? '/' : '';
+            location.href = originPlusPrefix + extraSlash + input.value;
         });
     }
 
