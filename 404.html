@@ -4,8 +4,28 @@
     <meta charset="UTF-8">
     <title>Just the thing!</title>
     <style>
+      body {
+        background-color: hsl(0, 0%, 12.5%);
+        color: hsl(0, 0%, 87.5%);
+      }
+
+      .url-change[disabled] {
+        color: hsl(0, 0%, 68%);
+      }
+
+      @media (prefers-color-scheme: light) {
+        body {
+          background-color: white;
+          color: black;
+        }
+
+        .url-change[disabled] {
+          /* chrome initial value */
+          color: rgba(16, 16, 16, 0.3);
+        }
+      }
+
       .tenor {
-        background-color: #3f3f3f;
         margin: auto;
       }
 

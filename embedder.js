@@ -125,6 +125,7 @@
             return;
         }
         const url = exec[0];
+        document.body.classList.add('discord');
         embedDiscordResource(url)
     }
 
@@ -135,6 +136,7 @@
             return;
         }
         let url = exec.groups.resource;
+        document.body.classList.add('discord-external');
 
         if (url.startsWith('https/')) {
             url = `https://${url.substring(6)}`;
@@ -194,6 +196,7 @@
         const calculatedPadding = Math.floor((window.innerHeight / window.innerWidth * 100) + 0.5) - 2;
         const paddingBottom = Math.max(calculatedPadding, 10);
 
+        document.body.classList.add('redgifs');
         document.body.style.overflowY = 'hidden';
         document.body.innerHTML += `
 <div class="redgifs-container" style='position:relative; padding-bottom: ${paddingBottom}%'>
