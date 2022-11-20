@@ -1,5 +1,11 @@
 !function() {
-    const Types = { Unknown: 0, Tenor: 1, Discord: 2, DiscordExternal: 3 };
+    const Types = {
+        Unknown: 0,
+        Tenor: 1,
+        Discord: 2,
+        DiscordExternal: 3,
+        Redgifs: 4,
+    };
 
     const isTenorRegex = /tenor\.com/;
     const tenorIdRegex = /\d+$/;
@@ -7,6 +13,8 @@
     const discordUrlRegex = /https:\/\/(cdn|media).discordapp.(com|net)\/\S+/;
     // Example URL: https://images-ext-1.discordapp.net/external/abaYIADYF/https/i.redd.it/test.jpg
     const discordExternalUrlRegex = /https:\/\/images-ext-\d.discordapp.(com|net)\/(?<query>(?!https])\S+)(?<resource>(https|http)\S+)/i;
+    // Example url: https://www.redgifs.com/watch/moonlightsingingdancingcat
+    const redgifsUrlRegex = /https:\/\/(www\.)?redgifs\.com\/watch\/(?<resource>\S+)/i;
 
     window.addEventListener('load', () => {
         const type = getType();
@@ -19,6 +27,9 @@
                 break;
             case Types.DiscordExternal:
                 embedDiscordExternal();
+                break;
+            case Types.Redgifs:
+                embedRedgifs();
                 break;
             default:
                 addUrlInput();
@@ -36,6 +47,9 @@
         }
         if (discordExternalUrlRegex.test(location.href)) {
             return Types.DiscordExternal;
+        }
+        if (redgifsUrlRegex.test(location.href)) {
+            return Types.Redgifs;
         }
 
         return Types.Unknown;
@@ -71,6 +85,9 @@
         const button = document.querySelector('.url-change');
         button.setAttribute('disabled', '');
 
+        // For debug purposes, set true if local.
+        const isLocalHost = false;
+
         button.addEventListener('click', () => {
             const input = document.querySelector('.url-input');
             const hasPrefixUrl = location.pathname.startsWith(basePrefix);
@@ -78,7 +95,13 @@
 
             const originPlusPrefix = location.origin + prefix;
             const extraSlash = (!originPlusPrefix.endsWith('/') && !input.value.startsWith('/')) ? '/' : '';
-            location.href = originPlusPrefix + extraSlash + input.value;
+
+            if (!isLocalHost) {
+                location.href = originPlusPrefix + extraSlash + input.value;
+            } else {
+                location.search = input.value;
+            }
+
         });
     }
 
@@ -158,5 +181,52 @@
 
     function embedAudio(url, type) {
         document.body.innerHTML += `<audio controls><source src="${url}" type="audio/${type}"></audio>`;
+    }
+
+    function embedRedgifs() {
+        const exec = redgifsUrlRegex.exec(location.href);
+        if (!exec) {
+            document.body.innerHTML += "<p style='color: red;'>Could not get a resource id from the redgifs url!!</p>";
+            return;
+        }
+
+        const resource = exec.groups.resource;
+        const calculatedPadding = Math.floor((window.innerHeight / window.innerWidth * 100) + 0.5) - 2;
+        const paddingBottom = Math.max(calculatedPadding, 10);
+
+        document.body.style.overflowY = 'hidden';
+        document.body.innerHTML += `
+<div class="redgifs-container" style='position:relative; padding-bottom: ${paddingBottom}%'>
+  <iframe src='https://redgifs.com/ifr/${resource}' frameBorder='0' scrolling='no' width='100%' height='100%' style='position:absolute; top:0; left:0;' allowFullScreen></iframe>
+</div>`;
+
+        document.body.querySelector('iframe').addEventListener('load', () => {
+            setOffset();
+        });
+
+        function setOffset() {
+            const iframe = document.body.querySelector('iframe');
+            if (!iframe) {
+                return;
+            }
+
+            iframe.style.left = '0';
+            const bounds = iframe.getBoundingClientRect();
+            if (bounds.x >= 0) {
+                return;
+            }
+
+            let offset = -bounds.x;
+            const halfWidth = Math.max((window.innerWidth - bounds.width) / 2, 0);
+            offset += halfWidth;
+            iframe.style.left = offset + "px";
+        }
+
+        window.addEventListener('resize', () => {
+            const calculatedPadding = Math.floor((window.innerHeight / window.innerWidth * 100) + 0.5) - 2;
+            const paddingBottom = Math.max(calculatedPadding, 10);
+            document.body.querySelector('.redgifs-container').style.paddingBottom = `${paddingBottom}%`;
+            setOffset();
+        });
     }
 }();
