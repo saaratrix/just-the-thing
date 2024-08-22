@@ -1,4 +1,3 @@
-import re
 from enum import Enum
 
 from .redgifs_embedder import redgifs_url_regex, RedgifsEmbedder
