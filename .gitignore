@@ -1,1 +1,5 @@
 ﻿.idea
+__pycache__
+backend/temp_files
+backend/venv/*
+backend/redgifs_auth.json
