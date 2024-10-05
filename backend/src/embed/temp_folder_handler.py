@@ -30,6 +30,12 @@ class TempFolderHelper:
         return TempFolderHelper._temp_folder_path
 
     @staticmethod
+    def contains_file(file_name) -> bool:
+        temp_folder = TempFolderHelper.get_temp_folder_path()
+        path = os.path.join(temp_folder, file_name)
+        return os.path.exists(path), path
+
+    @staticmethod
     def get_temp_folder_files():
         return os.listdir(TempFolderHelper.get_temp_folder_path())
 
