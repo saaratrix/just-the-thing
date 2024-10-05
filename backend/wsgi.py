@@ -7,6 +7,7 @@ parent_path = os.path.dirname(current_path)
 sys.path.append(parent_path)
 
 from src.app import create_app
+
 app = create_app()
 
 if __name__ != "__main__":
