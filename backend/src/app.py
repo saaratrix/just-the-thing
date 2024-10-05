@@ -1,6 +1,5 @@
 from flask import Flask
 
-from .embed.file_utility import FileUtility
 from .routes.embed import embed_bp
 
 
