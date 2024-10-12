@@ -7,7 +7,7 @@ from backend.src.embed.temp_folder_handler import TempFolderHelper
 
 embed_bp = Blueprint('embed_bp', __name__)
 
-@embed_bp.route('/embed', methods=['GET'])
+@embed_bp.route('/embed/', methods=['GET'], strict_slashes=False)
 def index() -> Response:
     return render_template('embed.html')
 
