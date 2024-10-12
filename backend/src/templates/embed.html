@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Title</title>
+  <link href="/static/styles.css" rel="stylesheet">
+</head>
+<body>
+  <div style="display: flex; flex-direction: column; gap: 10px; padding: 10px; flex: auto;">
+    <p style="margin: 0; font-size: 1.5em;">My little embedding app:</p>
+    <div style="display: flex; gap: 10px;">
+      <label >Url:</label>
+      <input id="url" name="url" type="text" style="max-width:512px; flex: auto;">
+      <button id="clear">Clear</button>
+    </div>
+    <div style="max-width: 400px; display: flex; gap: 10px;">
+      <button id="embed" disabled>Embed</button>
+      <button id="download" disabled>Download</button>
+      <a id="embed-url" href="" hidden></a>
+    </div>
+    <div id="messages" style="display: flex; flex-direction: column"></div>
+    <div id="embed-area" style="flex: auto;"></div>
+  </div>
+
+  <script type="application/javascript">
+    (function() {
+      const messagesElement = document.getElementById('messages');
+      document.getElementById('clear').addEventListener('click', function() {
+        document.getElementById('url').value = '';
+      });
+
+      function isValidUrl(url) {
+        if (!url) {
+          return false;
+        }
+
+        const redgifsRegex = /(https:\/\/)?(www\.|v3\.|v2\.)?redgifs\.com\/(watch|ifr)\/(\S+)/i;
+        if (url.match(redgifsRegex)) {
+          return true;
+        }
+        return false;
+      }
+      document.getElementById('url').addEventListener('input', function() {
+        const isDisabled = !isValidUrl(this.value);
+
+        console.log('isDisabled', isDisabled);
+        document.getElementById('embed').disabled = isDisabled;
+        document.getElementById('download').disabled = isDisabled;
+      });
+
+
+      document.getElementById('embed').addEventListener('click', function () {
+        const url = document.getElementById('url').value;
+        if (!isValidUrl(url)) {
+          return;
+        }
+
+        messagesElement.innerHTML = '';
+
+        fetch(`/embed/file/${url}`).then(async (response) => {
+          console.log('response', response);
+          if (!response.ok) {
+            messagesElement.innerHTML += `<p style='color: red;'>${response.statusText}</p>`;
+            return;
+          }
+
+          const embedInfo = await response.json();
+
+          const embedViewUrl = `/embed/view/${url}`;
+          messagesElement.innerHTML += `<p>Shareable url: <a href="${embedViewUrl}">${embedViewUrl}</a></p>`;
+
+          console.log(embedInfo);
+          embedResponse(embedInfo.url, embedInfo.mediaType);
+        }).catch(function(error) {
+          messagesElement.innerHTML += `<p style='color: red;'>${error}</p>`;
+        });
+      });
+
+      document.getElementById('download').addEventListener('click', function () {
+        const resource_url = document.getElementById('url').value;
+        if (!isValidUrl(resource_url)) {
+          return;
+        }
+
+        const downloadUrl = `/download/${resource_url}`;
+
+        const a = document.createElement('a');
+        a.href = downloadUrl;
+        // The name will be the last part of the url most of the time so this is good.
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      });
+
+      function embedResponse(url, mediaType) {
+          const embedArea = document.getElementById('embed-area');
+
+          embedArea.innerHTML = `<video class="embed-video embed-video-constrained" controls autoplay>
+              <source src="${url}" type="${mediaType}">
+              Your browser does not support the video tag.
+          </video>`;
+      }
+
+    })();
+  </script>
+</body>
+</html>
