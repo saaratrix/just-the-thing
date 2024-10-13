@@ -28,14 +28,20 @@ def embed(url: str) -> tuple[str, int] | Response:
 
 def get_file_path(resource_name: str) -> str:
     folder_path = TempFolderHelper.get_temp_folder_path()
-    file_path = os.path.join(folder_path, resource_name)
+    file_path = os.path.normpath(os.path.join(folder_path, resource_name))
+    if not file_path.startswith(folder_path):
+        return None
+
+    if FileUtility.get_media_type(file_path) is None:
+        return None
+
     return file_path
 
 @embed_bp.route('/file/<filename>', methods=['GET'])
 def serve_file(filename: str) -> Response:
     file_path = get_file_path(filename)
 
-    if not os.path.exists(file_path):
+    if file_path is None or not os.path.exists(file_path):
         return Response(status=404)
 
     return send_file(file_path)
@@ -43,11 +49,11 @@ def serve_file(filename: str) -> Response:
 def get_embed_resource_url(url: str) -> str | None:
     embedder = get_embedder(url)
     if embedder is None:
-        return Response(status=404)
+        return None, None
 
     resource_path = embedder.fetch_embed_resource(url)
     if not resource_path:
-        return Response(status=404)
+        return None, None
 
     resource_filename = os.path.basename(resource_path)
     media_type = FileUtility.get_media_type(resource_filename)
@@ -64,5 +70,8 @@ def get_resource_url(url: str) -> tuple[str, int] | Response:
 @embed_bp.route('/embed/view/<path:url>', methods=['GET'])
 def view(url: str) -> tuple[str, int] | Response:
     resource_url, media_type = get_embed_resource_url(url)
+
+    if resource_url is None:
+        return Response(status=404)
 
     return render_template('embed_video.html', resource_url=resource_url, resource_type=media_type)

@@ -32,7 +32,11 @@ class TempFolderHelper:
     @staticmethod
     def contains_file(file_name) -> bool:
         temp_folder = TempFolderHelper.get_temp_folder_path()
-        path = os.path.join(temp_folder, file_name)
+        path = os.path.normpath(os.path.join(temp_folder, file_name))
+
+        if not path.startswith(temp_folder):
+            return False
+
         return os.path.exists(path), path
 
     @staticmethod

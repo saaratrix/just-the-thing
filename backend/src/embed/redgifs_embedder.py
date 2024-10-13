@@ -23,9 +23,7 @@ class RedgifsEmbedder:
 
         # check if file exists in temp folder and then return that.
         result = self.check_if_downloaded(resource)
-        if result is not None:
-            print(f"Found {resource} in temp folder.")
-        else:
+        if result is None:
             result = self.api_handler.get_and_download_video(resource)
 
         end_time = time.perf_counter()
