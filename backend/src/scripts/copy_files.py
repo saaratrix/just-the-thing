@@ -92,8 +92,9 @@ def main():
     folder_searches = [
         {"includes": ["src/**/*.py"], "excludes": ["tests"], "only_print_errors": False},
         {"includes": ["src/**/*.html"], "excludes": ["tests"], "only_print_errors": False},
-        {"includes": ["src/**/*.css"], "excludes": ["tests"], "only_print_errors": False},
-        {"includes": ["src/**/*.js"], "excludes": ["tests"], "only_print_errors": False},
+        {"includes": ["src/static/**/*.css"], "excludes": ["tests"], "only_print_errors": False},
+        {"includes": ["src/static/**/*.js"], "excludes": ["tests"], "only_print_errors": False},
+        {"includes": ["src/static/**/*.png"], "excludes": ["tests"], "only_print_errors": False},
     ]
 
     successes = 0

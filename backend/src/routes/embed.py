@@ -57,21 +57,21 @@ def get_embed_resource_url(url: str) -> str | None:
 
     resource_filename = os.path.basename(resource_path)
     media_type = FileUtility.get_media_type(resource_filename)
-    return f"/file/{resource_filename}", media_type
+    return f"/file/{resource_filename}", media_type, resource_filename
 
 @embed_bp.route('/embed/file/<path:url>', methods=['GET'])
 def get_resource_url(url: str) -> tuple[str, int] | Response:
-    resource_filename, media_type = get_embed_resource_url(url)
+    resource_url, media_type, _ = get_embed_resource_url(url)
     return jsonify({
-        "url": resource_filename,
+        "url": resource_url,
         "mediaType": media_type
    })
 
 @embed_bp.route('/embed/view/<path:url>', methods=['GET'])
 def view(url: str) -> tuple[str, int] | Response:
-    resource_url, media_type = get_embed_resource_url(url)
+    resource_url, media_type, resource_filename = get_embed_resource_url(url)
 
     if resource_url is None:
         return Response(status=404)
 
-    return render_template('embed_video.html', resource_url=resource_url, resource_type=media_type)
+    return render_template('embed_video.html', resource_url=resource_url, resource_type=media_type, title=resource_filename)
