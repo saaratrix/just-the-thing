@@ -12,6 +12,14 @@ body {
     flex-direction: column;
 }
 
+/* This is for the /view/ so the embedded videos are in the center instead of to the left */
+.viewer {
+    /* flex-direction: column; made content always take 100% of screen size. */
+    flex-direction: row;
+    justify-content: center;
+    padding: 10px;
+}
+
 a {
     color: #a087d2;
 }
