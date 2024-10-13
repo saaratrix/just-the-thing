@@ -35,3 +35,12 @@ a:hover {
     max-width: 100%;
     max-height: calc(100vh - 100px);
 }
+
+.heart {
+    color: rgb(46, 46, 58);
+    font-size: 3.5em;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    pointer-events: none;
+}
