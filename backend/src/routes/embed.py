@@ -63,7 +63,7 @@ def get_embed_resource_url(url: str) -> (str | None, str | None, str | None):
     media_type = FileUtility.get_media_type(resource_filename)
     return f"/file/{resource_filename}", media_type, resource_filename
 
-# This is the route that downlodas file and saves it to server.
+# This is the route that downloads file and saves it to server.
 @embed_bp.route('/embed/file/<path:url>', methods=['GET'])
 def get_resource_url(url: str) -> tuple[str, int] | Response:
     resource_url, media_type, resource_filename = get_embed_resource_url(url)
