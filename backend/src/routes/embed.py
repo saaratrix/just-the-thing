@@ -46,25 +46,31 @@ def serve_file(filename: str) -> Response:
 
     return send_file(file_path)
 
-def get_embed_resource_url(url: str) -> str | None:
+def get_embed_resource_url(url: str) -> (str | None, str | None, str | None):
     embedder = get_embedder(url)
     if embedder is None:
-        return None, None
+        resource_filename, media_type = FileUtility.try_get_file_from_url(url)
+        if resource_filename is None:
+            return None, None, None
+
+        return f"/file/{resource_filename}", media_type, resource_filename
 
     resource_path = embedder.fetch_embed_resource(url)
     if not resource_path:
-        return None, None
+        return None, None, None
 
     resource_filename = os.path.basename(resource_path)
     media_type = FileUtility.get_media_type(resource_filename)
     return f"/file/{resource_filename}", media_type, resource_filename
 
+# This is the route that downloads file and saves it to server.
 @embed_bp.route('/embed/file/<path:url>', methods=['GET'])
 def get_resource_url(url: str) -> tuple[str, int] | Response:
-    resource_url, media_type, _ = get_embed_resource_url(url)
+    resource_url, media_type, resource_filename = get_embed_resource_url(url)
     return jsonify({
         "url": resource_url,
-        "mediaType": media_type
+        "mediaType": media_type,
+        "resource": resource_filename,
    })
 
 @embed_bp.route('/embed/view/<path:url>', methods=['GET'])
