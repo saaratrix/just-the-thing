@@ -1,6 +1,6 @@
 import mimetypes
 import os
-
+from .temp_folder_handler import TempFolderHelper
 
 class FileUtility:
     SUPPORTED_MEDIA_TYPES = {
@@ -17,3 +17,19 @@ class FileUtility:
             return None
 
         return media_type
+
+    @staticmethod
+    def try_get_file_from_url(url: str) -> (str | None, str | None):
+        contains, path = TempFolderHelper.contains_file(url)
+        if contains:
+            return url, FileUtility.get_media_type(url)
+
+        extensions = FileUtility.SUPPORTED_MEDIA_TYPES.keys()
+        for extension in extensions:
+            file = url + extension
+            contains, path =  TempFolderHelper.contains_file(file)
+            if contains:
+                media_type = FileUtility.SUPPORTED_MEDIA_TYPES[extension]
+                return file, media_type
+
+        return None, None

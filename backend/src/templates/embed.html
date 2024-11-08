@@ -67,7 +67,7 @@
 
           const embedInfo = await response.json();
 
-          const embedViewUrl = `/embed/view/${url}`;
+          const embedViewUrl = `/embed/view/${embedInfo.resource}`;
           messagesElement.innerHTML += `<p>Shareable url: <a href="${embedViewUrl}">${embedViewUrl}</a></p>`;
 
           console.log(embedInfo);
