@@ -29,7 +29,8 @@ a:hover {
 }
 
 .embed-video {
-
+    /* So video doesn't go off screen if it's larger than the body and you can't scroll sideways. */
+    max-width: 100%;
 }
 .embed-video-constrained {
     max-width: 100%;
