@@ -9,10 +9,30 @@
     <title>Embed - {{ resource_url }}</title>
 </head>
 <body class="viewer">
-    <video class="embed-video" controls autoplay>
-        <source src="{{ resource_url }}" type="{{ resource_type }}">
-        Your browser does not support the video tag.
-    </video>
+    <div class="viewer-item">
+        <div class="video-controls">
+            <div class="video-controls-container">
+                <div class="video-volume">
+                    <div class="video-volume-toggle video-icon">
+                        <svg viewBox="0 0 516.25 356.52" version="1.1" id="volume-icon" xmlns="http://www.w3.org/2000/svg"><style type="text/css">path{fill:#e1e1e8}#muted{display:none}.muted #muted{display:block}.muted #above_0{display:none}.muted #above_50{display:none;}#above_50{display:none}.above_50 #above_50{display:block}</style><g id="body"><path d="M57.874 99.41h115.395L268.719 4.38c7.082-5.81 18.521-5.86 25.59-0.04 3.602 2.86 5.366 6.68 5.366 10.54h0.061v326.69c0 8.22-8.129 14.95-18.192 14.95-5.086 0-9.674-1.73-12.984-4.5L174.218 273.03H57.874c-15.917 0-30.409-5.36-40.85-13.95C6.522 250.5 0 238.59 0 225.51v-78.54c0-13.08 6.522-24.98 16.963-33.56 10.502-8.64 24.994-14 40.911-14z" id="volume-body"/></g><g id="muted"><path d="m478.876 97.195-140.937 140.937 8.381 8.381 141.157-141.157z" id="mute_1"/><path d="M346.573 97.454 487.512 239.614 478.91 246.893 338.192 105.836z" id="mute_2"/></g><g id="above_50"><path d="m432.606 20.48c-4.064-6.93-0.523-15.27 7.91-18.61 8.433-3.35 18.569-0.44 22.634 6.49 27.684 47.21 52.556 118.63 53.092 173.67 0.499 52.88-19.762 121.56-48.005 166.45-4.296 6.84-14.517 9.53-22.84 6.01-8.323-3.53-11.597-11.93-7.313-18.77 25.676-40.8 44.744-104.95 44.282-153.47-0.442-57.71-24.159-124.95-49.713-168.53z" id="above_50_path"/></g><g id="above_0"><path d="m352.78 74.74c-3.602-7.12 0.499-15.28 9.163-18.23 8.652-2.96 18.581 0.41 22.171 7.53 15.795 31.07 29.18 76.2 29.898 115.1 0.706 38.32-11.049 82.69-26.016 113.18-3.48 7.14-13.361 10.61-22.05 7.75-8.688-2.86-12.911-10.98-9.431-18.12 13.3-27.08 24.276-67.64 23.631-102.48-0.657-35.39-13.191-76.82-27.367-104.73z" id="above_0_path"/></g></svg>
+                    </div>
+                    <div class="video-volume-slider">
+                        <input type="range" min="0" max="100" step="1">
+                    </div>
+                </div>
+                <div class="video-fullscreen video-icon">
+                    <object class="video-icon" data="/static/fullscreen.svg"></object>
+                </div>
+            </div>
+            <div class="video-controls-extra-space"></div>
+        </div>
+        <video class="embed-video" controls autoplay muted>
+            <source src="{{ resource_url }}" type="{{ resource_type }}">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
     <div class="heart">❤</div>
+    <script src="/static/video-controls.js"></script>
 </body>
 </html>

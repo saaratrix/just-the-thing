@@ -95,6 +95,7 @@ def main():
         {"includes": ["src/static/**/*.css"], "excludes": ["tests"], "only_print_errors": False},
         {"includes": ["src/static/**/*.js"], "excludes": ["tests"], "only_print_errors": False},
         {"includes": ["src/static/**/*.png"], "excludes": ["tests"], "only_print_errors": False},
+        {"includes": ["src/static/**/*.svg"], "excludes": ["tests"], "only_print_errors": False},
     ]
 
     successes = 0
