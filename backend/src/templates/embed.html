@@ -96,6 +96,18 @@
         document.body.removeChild(a);
       });
 
+      window.test_edit = (resource, start = 0, end = 120) => {
+        const formdata = new FormData();
+        formdata.set("type", "cut");
+        formdata.set("cutStart", start.toString());
+        formdata.set("cutEnd", end.toString());
+
+        fetch(`/edit/cut/${resource}`, {
+            method: 'POST',
+            body: formdata,
+        }).then(response => console.log('edit response', response));
+      }
+
       function embedResponse(url, mediaType) {
           const embedArea = document.getElementById('embed-area');
 
