@@ -20,6 +20,22 @@
       <button id="download" disabled>Download</button>
       <a id="embed-url" href="" hidden></a>
     </div>
+    <div id="tools" class="invisible">
+        <p style="margin: 0; font-size: 1.5em; margin-top: 1em;">Extra:</p>
+        <form id="cut-form" method="POST" >
+            <fieldset class="inline-block">
+                <legend>Cut <sup>(seconds)</sup></legend>
+                <label>
+                    <span>Start: </span> <input type="number" name="cutStart" min="0" step="any" style="max-width: 8ch">
+                </label>
+                <label>
+                    <span>End: </span> <input type="number" name="cutEnd" step="any" style="max-width: 8ch">
+                </label>
+                <br>
+                <input type="submit" name="cutSubmit" style="margin-top: 0.5em;" value="Cut Video" disabled />
+            </fieldset>
+        </form>
+    </div>
     <div id="messages" style="display: flex; flex-direction: column"></div>
     <div id="embed-area" style="flex: auto;"></div>
   </div>
@@ -27,6 +43,15 @@
 
   <script type="application/javascript">
     (function() {
+      /** @type {string | undefined} */
+      let currentResource;
+      /** @type {HTMLVideoElement} */
+      let currentVideoElement = undefined;
+      /** @type {number | undefined} */
+      let videoStart = undefined;
+      /** @type {number | undefined} */
+      let videoEnd = undefined;
+
       const messagesElement = document.getElementById('messages');
       document.getElementById('clear').addEventListener('click', function() {
         document.getElementById('url').value = '';
@@ -46,7 +71,6 @@
       document.getElementById('url').addEventListener('input', function() {
         const isDisabled = !isValidUrl(this.value);
 
-        console.log('isDisabled', isDisabled);
         document.getElementById('embed').disabled = isDisabled;
         document.getElementById('download').disabled = isDisabled;
       });
@@ -63,16 +87,17 @@
         fetch(`/embed/file/${url}`).then(async (response) => {
           console.log('response', response);
           if (!response.ok) {
+            currentResource = undefined;
             messagesElement.innerHTML += `<p style='color: red;'>${response.statusText}</p>`;
             return;
           }
 
           const embedInfo = await response.json();
 
+          currentResource = embedInfo.resource;
           const embedViewUrl = `/embed/view/${embedInfo.resource}`;
           messagesElement.innerHTML += `<p>Shareable url: <a href="${embedViewUrl}">${embedViewUrl}</a></p>`;
 
-          console.log(embedInfo);
           embedResponse(embedInfo.url, embedInfo.mediaType);
         }).catch(function(error) {
           messagesElement.innerHTML += `<p style='color: red;'>${error}</p>`;
@@ -96,25 +121,150 @@
         document.body.removeChild(a);
       });
 
-      window.test_edit = (resource, start = 0, end = 120) => {
-        const formdata = new FormData();
-        formdata.set("type", "cut");
-        formdata.set("cutStart", start.toString());
-        formdata.set("cutEnd", end.toString());
 
-        fetch(`/edit/cut/${resource}`, {
-            method: 'POST',
-            body: formdata,
-        }).then(response => console.log('edit response', response));
+      document.addEventListener('embed:videoChanged', () => {
+        currentVideoElement = document.querySelector('video');
+        const hasVideo = !!currentVideoElement;
+
+        document.getElementById('tools').classList.toggle('invisible', !hasVideo);
+        if (hasVideo) {
+          if (currentVideoElement.readyState >= 1) {
+            document.dispatchEvent(new CustomEvent('embed:toolsVisible'));
+          } else {
+            currentVideoElement.addEventListener('loadeddata', (event) => {
+              document.dispatchEvent(new CustomEvent('embed:toolsVisible'));
+            });
+          }
+        }
+
+        currentVideoElement.addEventListener('timeupdate', ontimeupdate);
+      });
+
+      function ontimeupdate() {
+          if (isNaN(videoStart) || isNaN(videoEnd)) {
+              return;
+          }
+
+          if (currentVideoElement !== this) {
+              this.pause();
+              return;
+          }
+
+          if (videoStart === videoEnd) {
+              this.currentTime = videoStart;
+              return this.pause();
+          }
+
+          // Just do nothing if start is > end,  or end < start.
+          if (videoStart > videoEnd) {
+            return;
+          }
+
+          const start = Math.max(videoStart, 0);
+          const end = Math.min(videoEnd, this.duration);
+
+          if (this.currentTime >= videoEnd) {
+              this.currentTime = this.paused ? end : start;
+          } else if (this.currentTime < videoStart) {
+              this.currentTime = start;
+          }
+      }
+
+      document.addEventListener('embed:toolsVisible', () => {
+        const cutForm = document.getElementById('cut-form');
+        const data = new FormData(cutForm);
+
+        cutForm.querySelector('[name="cutStart"]').value = videoStart = 0;
+        cutForm.querySelector('[name="cutEnd"]').value = videoEnd = currentVideoElement.duration.toFixed(3);
+
+        const submitButton = cutForm.querySelector('[name="cutSubmit"]');
+        const hasStart = !isNaN(parseFloat(data.get('cutStart')));
+        const hasEnd = !isNaN(parseFloat(data.get('cutEnd')));
+        submitButton.disabled = !hasStart || !hasEnd;
+      });
+
+      document.getElementById('cut-form').addEventListener('input', function() {
+        const data = new FormData(this);
+        let start = parseFloat(data.get('cutStart'));
+        let end = parseFloat(data.get('cutEnd'));
+
+        const submitButton = this.querySelector('[name="cutSubmit"]');
+        submitButton.disabled = isNaN(start) || isNaN(end);
+      });
+
+      document.getElementById('cut-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        if (!currentResource) {
+          return;
+        }
+
+        messagesElement.innerHTML = '';
+
+        const formdata = new FormData(this);
+        fetch(`/edit/cut/${currentResource}`, { method: 'POST', body: formdata }).then(async (response) => {
+          if (!response.ok) {
+            messagesElement.innerHTML += `<p style='color: red;'>${response.statusText}</p>`;
+            return;
+          }
+
+          const embedInfo = await response.json();
+          const embedViewUrl = `/embed/view/${embedInfo.resource}`;
+          messagesElement.innerHTML += `<p>Shareable url: <a href="${embedViewUrl}">${embedViewUrl}</a></p>`;
+
+        });
+      });
+
+      document.getElementById('cut-form').querySelector('[name="cutStart"]').addEventListener('input', function () {
+        if (!currentVideoElement) {
+          this.value = '';
+          return;
+        }
+
+        let start = parseFloat(this.value);
+        if (isNaN(start) || start < 0) {
+          start = 0;
+        } else if (start > currentVideoElement.duration) {
+          start = currentVideoElement.duration;
+        }
+        this.value = start;
+        videoStart = start;
+        updateVideoLimits(start);
+      });
+
+      document.getElementById('cut-form').querySelector('[name="cutEnd"]').addEventListener('input', function () {
+        if (!currentVideoElement) {
+          this.value = '';
+          return;
+        }
+
+        let end = parseFloat(this.value);
+        if (isNaN(end) || end > currentVideoElement.duration) {
+          end = currentVideoElement.duration.toFixed(3);
+        } else if (end < 0) {
+          end = 0;
+        }
+        this.value = end;
+        videoEnd = end;
+        updateVideoLimits(end);
+      });
+
+      function updateVideoLimits(newTime) {
+        if (!currentVideoElement) {
+          return;
+        }
+
+        currentVideoElement.currentTime = newTime;
       }
 
       function embedResponse(url, mediaType) {
           const embedArea = document.getElementById('embed-area');
 
-          embedArea.innerHTML = `<video class="embed-video embed-video-constrained" controls autoplay>
+          embedArea.innerHTML = `<video class="embed-video embed-video-constrained" controls autoplay loop>
               <source src="${url}" type="${mediaType}">
               Your browser does not support the video tag.
           </video>`;
+          document.dispatchEvent(new CustomEvent('embed:videoChanged'));
       }
 
     })();

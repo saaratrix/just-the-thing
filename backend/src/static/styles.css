@@ -131,3 +131,14 @@ a:hover {
 .video-fullscreen {
     width: var(--icon-size);
 }
+
+#tools {
+}
+
+.inline-block {
+    display: inline-block;
+}
+
+.invisible {
+    visibility: hidden;
+}
