@@ -1,4 +1,6 @@
 import os
+import time
+from typing import List
 
 
 class TempFolderHelper:
@@ -30,12 +32,12 @@ class TempFolderHelper:
         return TempFolderHelper._temp_folder_path
 
     @staticmethod
-    def contains_file(file_name) -> bool:
+    def contains_file(file_name) -> tuple[bool, None] | tuple[bool, str]:
         temp_folder = TempFolderHelper.get_temp_folder_path()
         path = os.path.normpath(os.path.join(temp_folder, file_name))
 
         if not path.startswith(temp_folder):
-            return False
+            return False, None
 
         return os.path.exists(path), path
 
@@ -60,3 +62,26 @@ class TempFolderHelper:
         os.makedirs(path)
         # Grants read and write permissions to the owner
         os.chmod(path, 0o600)
+
+    @staticmethod
+    def try_remove_old_files(hours: int, ignore: str | None):
+        try:
+            cutoff = time.time() - (hours * 3600)
+            to_delete: List[str] = []
+            temp_folder = TempFolderHelper.get_temp_folder_path()
+            for file in TempFolderHelper.get_temp_folder_files():
+                if ignore is not None and file.startswith(ignore.lower()):
+                    continue
+
+                path = os.path.join(temp_folder, file)
+
+                if os.path.getmtime(path) < cutoff:
+                    to_delete.append(path)
+
+            for file in to_delete:
+                print(f"Removed file {file}")
+                os.remove(file)
+        except Exception as e:
+            print(f"Failed to remove old files: {e}")
+
+
