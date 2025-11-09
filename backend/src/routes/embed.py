@@ -68,7 +68,7 @@ def get_embed_resource_url(url: str) -> (str | None, str | None, str | None):
 def get_resource_url(url: str) -> tuple[str, int] | Response:
     resource_url, media_type, resource_filename = get_embed_resource_url(url)
     # No point in removing the same resource if it happens to be old and download it again.
-    TempFolderHelper.try_remove_old_files(24 * 7, resource_url)
+    TempFolderHelper.try_remove_old_files(2 * 24 * 7, resource_url)
     return jsonify({
         "url": resource_url,
         "mediaType": media_type,
