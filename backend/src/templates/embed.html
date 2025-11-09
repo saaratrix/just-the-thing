@@ -202,6 +202,7 @@
         messagesElement.innerHTML = '';
 
         const formdata = new FormData(this);
+        formdata.set('type', 'cut');
         fetch(`/edit/cut/${currentResource}`, { method: 'POST', body: formdata }).then(async (response) => {
           if (!response.ok) {
             messagesElement.innerHTML += `<p style='color: red;'>${response.statusText}</p>`;
